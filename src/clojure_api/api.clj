@@ -1,9 +1,10 @@
 (ns clojure-api.api
       (:import com.mchange.v2.c3p0.ComboPooledDataSource)
+      (:require compojure.core)
       (:require cheshire.core)
-      (:require ring.util.response)
       (:require [compojure.handler :as handler]
                 [ring.middleware.json :as middleware]
+                [ring.util.response :refer [response]]
                 [clojure.java.jdbc :as sql]
                 [compojure.route :as route]))
 
@@ -31,7 +32,7 @@
 (defn db-connection [] @pooled-db)
 
 (defn uuid [] (str (java.util.UUID/randomUUID)))
-    
+
 (sql/with-connection (db-connection)
     (sql/create-table :users [:id "varchar(256)" "primary key"]
                              [:name "varchar(1024)"]
@@ -43,6 +44,21 @@
            (sql/with-query-results results
              ["select * from users"]
              (into [] results)))))
+
+(defn get-user [id]
+     (sql/with-connection (db-connection)
+      (sql/with-query-results results
+        ["select * from documents where id = ?" id]
+        (cond
+          (empty? results) {:status 404}
+          :else (response (first results))))))
+
+(defn create-new-user [user]
+     (let [id (uuid)]
+       (sql/with-connection (db-connection)
+         (let [user (assoc doc "id" id)]
+           (sql/insert-record :users user)))
+  (get-user id)))
 
  (defroutes app-routes
      (context "/users" []
