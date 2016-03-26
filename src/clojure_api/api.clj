@@ -26,10 +26,12 @@
                    (.setInitialPoolSize 1))]
         {:datasource cpds}))
 
-    (def pooled-db (delay (pool db-config)))
+(def pooled-db (delay (pool db-config)))
 
-    (defn db-connection [] @pooled-db)
+(defn db-connection [] @pooled-db)
 
+(defn uuid [] (str (java.util.UUID/randomUUID)))
+    
 (sql/with-connection (db-connection)
     (sql/create-table :users [:id "varchar(256)" "primary key"]
                              [:name "varchar(1024)"]
