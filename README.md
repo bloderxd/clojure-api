@@ -1,2 +1,3 @@
-# clojure-api
-Rest API example made with closure
+# Clojure Rest API example
+
+Rest API example made with clojure :heart:
